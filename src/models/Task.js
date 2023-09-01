@@ -1,8 +1,8 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db');
+const sequelizeInstance= require('../config/db');
 
-const Task = sequelize.define('Task', {
-  name: {
+const Task = sequelizeInstance.define('Task', {
+  taskName: {
     type: DataTypes.STRING,
     allowNull: false,
   },

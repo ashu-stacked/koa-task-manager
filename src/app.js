@@ -1,23 +1,26 @@
 const Koa = require('koa');
-const sequelize = require('./config/db');
+const sequelizeInstance = require('./config/db');
 const bodyParser = require('koa-bodyparser');
-const taskRoutes = require('./routes/taskRoutes'); // Adjust the path
+const taskRoutes = require('./routes/taskRoutes'); 
+const authRoutes = require('./routes/authRoutes'); // Adjust the path
+const errorLogger = require('./middlewares/errorLogger');
 const app = new Koa();
 
 app.use(bodyParser());
-
+app.use(errorLogger)
 // Use your task routes
 app.use(taskRoutes.routes());
+app.use(authRoutes.routes());
 
 // Connect to the database and sync models
 (async () => {
   try {
-    await sequelize.authenticate();
+    await sequelizeInstance.authenticate();
     console.log('Connected to the database');
-    await sequelize.sync();
+    await sequelizeInstance.sync();
     console.log('Database synced with models');
   } catch (error) {
-    console.error('Unable to connect or sync with the database:', error);
+    throw error;
   }
 })();
 
