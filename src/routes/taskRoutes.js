@@ -6,7 +6,7 @@ const {createTask,getAllTasks,getTaskById,deleteTaskById,updateTaskById} = requi
 router.post('/tasks', createTask);
 router.get('/tasks', getAllTasks);
 router.get('/tasks/:id', getTaskById);
-router.patch('/tasks/:id',updateTaskById)
+router.put('/tasks/:id',updateTaskById)
 router.delete('/tasks/:id',deleteTaskById)
 // Define more routes and use corresponding controller functions
 

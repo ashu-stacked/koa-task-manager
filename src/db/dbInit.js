@@ -1,7 +1,7 @@
 // dbInit.js
 
 const db = require('../config/db'); // Import your db module
-const { createTableUsers, createTableTasks } = require('../queries/queries'); // Import your table creation queries
+const { createTableUsers, createTableTasks } = require('./queries'); // Import your table creation queries
 
 async function initializeDatabase() {
   try {
