@@ -1,26 +1,36 @@
-const Task = require("../models/Task");
+const db = require('../config/db');
+const jwt = require('jsonwebtoken');
 
 // Create a new task
 const createTask = async (ctx) => {
   try {
+    const token = ctx.cookies.get('authToken');
+    if (!token) {
+      ctx.status = 403;
+      throw new Error('Invalid token, please login first.');
+    }
+
+    const jwtKey = 'Yjk5NTQ5ODc2ODYxZDc5ZjU3MDdhMWY1NWFlYTdiNzk=';
+    const decodedPayload = jwt.verify(token, jwtKey);
+    console.log(decodedPayload, 'user is logged in');
+    const userId = decodedPayload.id;
+
     const {
-      taskName,
+      taskname,
       content,
-      taskType,
-      taskPriority,
-      startDate,
-      endDate,
-      creationDate,
+      tasktype,
+      taskpriority,
+      startdate,
+      enddate,
+      creationdate,
     } = ctx.request.body;
-    const newTask = await Task.create({
-      taskName,
-      content,
-      taskType,
-      taskPriority,
-      startDate,
-      endDate,
-      creationDate,
-    });
+
+    // Create a new task in the database
+    const newTask = await db.one(
+      'INSERT INTO tasks (user_id, taskname, content, tasktype, taskpriority, startdate, enddate, creationdate) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
+      [userId, taskname, content, tasktype, taskpriority, startdate, enddate, creationdate]
+    );
+
     ctx.body = newTask;
   } catch (error) {
     throw error;
@@ -30,21 +40,23 @@ const createTask = async (ctx) => {
 // Get all tasks
 const getAllTasks = async (ctx) => {
   try {
-    const tasks = await Task.findAll();
+    // Retrieve all tasks from the database
+    const tasks = await db.any('SELECT * FROM tasks');
     ctx.body = tasks;
   } catch (error) {
     throw error;
   }
 };
 
-//Get a task by id
+// Get a task by id
 const getTaskById = async (ctx) => {
   const id = ctx.params.id;
   try {
-    const task = await Task.findByPk(id);
+    // Retrieve a task by id from the database
+    const task = await db.oneOrNone('SELECT * FROM tasks WHERE id = $1', [id]);
+
     if (!task) {
       ctx.status = 404;
-      //ctx.body = { error: "Task not found" };
       throw new Error('Task not found');
     } else {
       ctx.body = task;
@@ -54,35 +66,55 @@ const getTaskById = async (ctx) => {
   }
 };
 
-//updating a particular task by id
+// Update a task by id
 const updateTaskById = async (ctx) => {
   const id = ctx.params.id;
   const updates = ctx.request.body;
   try {
-    const task = await Task.findByPk(id);
+    // Retrieve a task by id from the database
+    const task = await db.oneOrNone('SELECT * FROM tasks WHERE id = $1', [id]);
+
     if (!task) {
       ctx.status = 404;
       throw new Error('Task not found');
     } else {
-      await task.update(updates);
-      ctx.body = { message: "Task updated successfully", task };
+      // Update the task in the database
+      await db.none(
+        'UPDATE tasks SET taskname = $1, content = $2, tasktype = $3, taskpriority = $4, startdate = $5, enddate = $6, creationdate = $7 WHERE id = $8',
+        [
+          updates.taskname,
+          updates.content,
+          updates.tasktype,
+          updates.taskpriority,
+          updates.startdate,
+          updates.enddate,
+          updates.creationdate,
+          id,
+        ]
+      );
+
+      ctx.body = { message: 'Task updated successfully', task };
     }
   } catch (error) {
     throw error;
   }
 };
 
-//delete a task by id
+// Delete a task by id
 const deleteTaskById = async (ctx) => {
   const id = ctx.params.id;
   try {
-    const task = await Task.findByPk(id);
+    // Retrieve a task by id from the database
+    const task = await db.oneOrNone('SELECT * FROM tasks WHERE id = $1', [id]);
+
     if (!task) {
       ctx.status = 404;
       throw new Error('Task not found');
     } else {
-      await task.destroy();
-      ctx.body = { message: "Task deleted successfully" };
+      // Delete the task from the database
+      await db.none('DELETE FROM tasks WHERE id = $1', [id]);
+
+      ctx.body = { message: 'Task deleted successfully' };
     }
   } catch (error) {
     throw error;
@@ -94,15 +126,6 @@ module.exports = {
   getAllTasks,
   getTaskById,
   updateTaskById,
-  deleteTaskById
+  deleteTaskById,
   // Add more controller functions here as needed
 };
-
-//api design -
-
-/**
- * 1. create new task
- * 2. get all tasks
- * 3. get task by id
- * 4.update task by id
- */

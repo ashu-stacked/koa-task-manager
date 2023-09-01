@@ -1,52 +1,78 @@
-const User = require('../models/User');
+const db = require('../config/db');
 const bcrypt = require('bcrypt');
-const {Op} = require('sequelize')
+const jwtGenerator = require('../utils/jwtGenerator');
 
-const signUp = async (ctx)=>{
-   // username,password,email in req body -> i will check username/email fields exist in db or not -> if yes then 409 else i will create a user with username and password and email
-   //once user is successfully created then i will send response the user object and also send a welcome mail to the user email
-  try{
-  const {userName,userEmail,userPassword} = ctx.request.body;
-  const user = await User.findOne({
-    where: {
-      [Op.or]: [
-        { userName: userName },
-        { userEmail: userEmail }
-      ]
+const signUp = async (ctx) => {
+  try {
+    const { username, useremail, userpassword } = ctx.request.body;
+    
+    // Check if a user with the given username or email already exists
+    const existingUser = await db.oneOrNone(
+      'SELECT * FROM users WHERE "username" = $1 OR "useremail" = $2',
+      [username, useremail]
+    );
+
+    if (existingUser) {
+      ctx.status = 409;
+      throw new Error('User already exists with this username or email');
     }
-  });
 
-  if(user){
-    ctx.status=409;
-    // ctx.body={error:'User already exists with this username or email.'}
-    throw new Error('User already exists with this username or email')
+    // Hash the user's password before storing it in the database
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(userpassword, saltRounds);
+
+    // Create a new user in the database
+    const newUser = await db.one(
+      'INSERT INTO users ("username", "useremail", "userpassword") VALUES ($1, $2, $3) RETURNING username, useremail',
+      [username, useremail, hashedPassword]
+    );
+
+    ctx.body = {
+      message: 'User created successfully',
+      user: {
+        username: newUser.username,
+        useremail: newUser.useremail,
+      },
+    };
+  } catch (error) {
+    throw error;
   }
+};
 
- try {
-    //hashing password before stoarge in DB
-   const saltRounds = 10;
-   const hashedPassword = await bcrypt.hash(userPassword, saltRounds);
-   const newUser = await User.create({
-     userName: userName,
-     userEmail: userEmail,
-     userPassword: hashedPassword
-   });
+const logIn = async (ctx) => {
+  try {
+    const { useremail, userpassword } = ctx.request.body;
 
-   ctx.body = {
-     message: 'User created successfully',
-     user: {
-       userName: newUser.userName,
-       userEmail: newUser.userEmail
-     }
-   };
- } catch (error) {
-   throw error;
- }
-}
+    // Find the user by email
+    const user = await db.oneOrNone('SELECT * FROM users WHERE useremail = $1', [
+      useremail,
+    ]);
 
-catch(error){
-  throw error;
-}
-}
+    if (!user || !bcrypt.compareSync(userpassword, user.userpassword)) {
+      ctx.status = 403;
+      throw new Error('No such user exists. Please sign up first');
+    }
 
-module.exports = {signUp}
+    console.log('This user is logged in successfully', user);
+
+    // Generate a JWT token
+    const token = jwtGenerator({
+      username: user.username,
+      useremail: user.useremail,
+      id:user.id
+    });
+
+    // Set the token in a cookie as HttpOnly
+    ctx.cookies.set('authToken', token, {
+      httpOnly: true,
+    });
+
+    const { username } = user;
+
+    ctx.body = { username, useremail, token };
+  } catch (error) {
+    throw error;
+  }
+};
+
+module.exports = { signUp, logIn };

@@ -1,10 +1,6 @@
-const { Sequelize } = require('sequelize');
+const pgp = require('pg-promise')();
+const connectionString = 'postgres://postgres:postgres@localhost:5000/utkarsh'; //database credentials
 
-// Create a Sequelize instance
-const sequelizeInstance = new Sequelize('utkarsh','postgres','postgres', {
-  host: 'localhost', // Assuming your database is hosted locally
-  port: 5000,
-  dialect: 'postgres',
-});
+const db = pgp(connectionString);
 
-module.exports = sequelizeInstance;
+module.exports = db;
