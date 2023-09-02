@@ -23,11 +23,12 @@ This Koa application is designed to serve as a backend API for a task management
 ## Features
 
 - User registration and authentication via JWT
+- Login and Logout feature for specific user
 - Task creation, modification, and deletion
 - Fetching a user's tasks
 - RESTful API design
 - JWT-based authentication
-- Middleware for error logging
+- Middlewares for error logging
 
 ## Requirements
 

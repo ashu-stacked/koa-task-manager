@@ -1,6 +1,10 @@
 const Router = require('koa-router');
 const router = new Router();
 const {createTask,getAllTasks,getTaskById,deleteTaskById,updateTaskById} = require('../controllers/taskController'); // Adjust the path
+const verifyJwt = require('../middlewares/verifyJwt');
+
+//putting this verification middleware on top so that it executes first and then rest of the routes
+router.use(verifyJwt)
 
 // Associate controller functions with routes
 router.post('/tasks', createTask);

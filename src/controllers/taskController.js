@@ -9,11 +9,7 @@ const createTask = async (ctx) => {
       ctx.status = 403;
       throw new Error('Invalid token, please login first.');
     }
-
-    const jwtKey = 'Yjk5NTQ5ODc2ODYxZDc5ZjU3MDdhMWY1NWFlYTdiNzk=';
-    const decodedPayload = jwt.verify(token, jwtKey);
-    console.log(decodedPayload, 'user is logged in');
-    const userId = decodedPayload.id;
+    const userId = ctx.state.user.id
 
     const {
       taskname,

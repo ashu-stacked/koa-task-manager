@@ -75,4 +75,15 @@ const logIn = async (ctx) => {
   }
 };
 
-module.exports = { signUp, logIn };
+const logOut = async (ctx) =>{
+  try{
+    //lets fetch the token and clear it from cookies
+    ctx.cookies.set('authToken', null,{ expires: new Date(0) })
+    ctx.body = {message:"User is successfully logged out!"}
+  }
+  catch(error){
+  throw error
+  }
+}
+
+module.exports = { signUp, logIn, logOut };
