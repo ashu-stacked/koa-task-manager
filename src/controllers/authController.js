@@ -5,7 +5,10 @@ const jwtGenerator = require('../utils/jwtGenerator');
 const signUp = async (ctx) => {
   try {
     const { username, useremail, userpassword } = ctx.request.body;
-    
+    if(!username || !userpassword || !useremail){
+      ctx.status=400;
+      throw new Error('Invalid request body');
+    }
     // Check if a user with the given username or email already exists
     const existingUser = await db.oneOrNone(
       'SELECT * FROM users WHERE "username" = $1 OR "useremail" = $2',
@@ -62,10 +65,13 @@ const logIn = async (ctx) => {
       id:user.id
     });
 
-    // Set the token in a cookie as HttpOnly
-    ctx.cookies.set('authToken', token, {
-      httpOnly: true,
-    });
+    // // Set the token in a cookie as HttpOnly
+    // ctx.cookies.set('authToken', token, {
+    //   httpOnly: true,
+    //   domain: 'localhost',
+    //   path:'/',
+    //   secure: false
+    // });
 
     const { username } = user;
 
@@ -75,6 +81,9 @@ const logIn = async (ctx) => {
   }
 };
 
+
+
+//no need of logout just use frontend
 const logOut = async (ctx) =>{
   try{
     //lets fetch the token and clear it from cookies

@@ -4,13 +4,7 @@ const jwt = require('jsonwebtoken');
 // Create a new task
 const createTask = async (ctx) => {
   try {
-    const token = ctx.cookies.get('authToken');
-    if (!token) {
-      ctx.status = 403;
-      throw new Error('Invalid token, please login first.');
-    }
     const userId = ctx.state.user.id
-
     const {
       taskname,
       content,

@@ -3,7 +3,8 @@ const jwt = require('jsonwebtoken');
 const verifyJwt = async (ctx,next)=>{
     try{
         const jwtKey = 'Yjk5NTQ5ODc2ODYxZDc5ZjU3MDdhMWY1NWFlYTdiNzk=';
-        const token = ctx.cookies.get('authToken');
+        const authHeader = ctx.headers.authorization;
+        const token = authHeader.split(" ")[1]
         if(!token){
             ctx.status = 403;
             throw new Error('You are not authorized to access')

@@ -6,9 +6,15 @@ const taskRoutes = require('./routes/taskRoutes');
 const authRoutes = require('./routes/authRoutes'); // Adjust the path
 const errorLogger = require('./middlewares/errorLogger');
 const initializeDatabase = require('./db/dbInit');
+const cors = require('@koa/cors');
 
 const app = new Koa();
 const router = new Router();
+app.use(cors({
+  origin: 'http://localhost:3000', // Specify the allowed origin
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+}));
 
 app.use(bodyParser());
 app.use(errorLogger);
@@ -21,7 +27,7 @@ app.use(authRoutes.routes());
 initializeDatabase()
   .then(() => {
     // Start the server after the database is initialized
-    const PORT = process.env.PORT || 3000;
+    const PORT = process.env.PORT || 4000;
     app.listen(PORT, () => {
       console.log(`Server listening on port ${PORT}`);
     });

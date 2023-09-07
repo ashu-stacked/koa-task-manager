@@ -46,7 +46,7 @@ To get started, follow these steps:
    ```bash
    git clone https://github.com/ashu-stacked/koa-task-manager.git
 
-2. npm install:
+2. npm install to install all dependencies needed to run this backend server:
 
    ```bash
    npm install
