@@ -27,14 +27,17 @@ This Koa application is designed to serve as a backend API for a task management
 - Task creation, modification, and deletion
 - Fetching a user's tasks
 - RESTful API design
-- JWT-based authentication
+- JWT-based authentication.
 - Middlewares for error logging
+- Postgres Task and User tabes with associations.
+- Using pg library to do db operations.
 
 ## Requirements
 
 Before running the application, ensure you have the following dependencies installed:
 
 - Node.js
+- Koa
 - PostgreSQL
 
 ## Installation

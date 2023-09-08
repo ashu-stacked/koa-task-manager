@@ -30,8 +30,10 @@ const createTask = async (ctx) => {
 // Get all tasks
 const getAllTasks = async (ctx) => {
   try {
+    const userLoggedIn = ctx.state.user
+    const id = userLoggedIn.id;
     // Retrieve all tasks from the database
-    const tasks = await db.any('SELECT * FROM tasks');
+    const tasks = await db.any('SELECT * FROM tasks WHERE user_id = $1', [id]);
     ctx.body = tasks;
   } catch (error) {
     throw error;

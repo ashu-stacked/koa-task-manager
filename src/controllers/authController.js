@@ -73,26 +73,13 @@ const logIn = async (ctx) => {
     //   secure: false
     // });
 
-    const { username } = user;
+    const { username,id } = user;
 
-    ctx.body = { username, useremail, token };
+    ctx.body = { username, useremail, token , id};
   } catch (error) {
     throw error;
   }
 };
 
 
-
-//no need of logout just use frontend
-const logOut = async (ctx) =>{
-  try{
-    //lets fetch the token and clear it from cookies
-    ctx.cookies.set('authToken', null,{ expires: new Date(0) })
-    ctx.body = {message:"User is successfully logged out!"}
-  }
-  catch(error){
-  throw error
-  }
-}
-
-module.exports = { signUp, logIn, logOut };
+module.exports = { signUp, logIn };
